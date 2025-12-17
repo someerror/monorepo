@@ -1,0 +1,30 @@
+version: '3.8'
+
+name: monorepo-prod
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: monorepo-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: monorepo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  svc-navigator:
+    image: ghcr.io/${GITHUB_REPOSITORY}/svc-navigator:latest
+    container_name: monorepo-navigator
+    restart: always
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/monorepo?schema=public"
+      PORT: 3001
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
